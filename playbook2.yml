@@ -1,8 +1,29 @@
-
 ---
-- name: Ping target servers
+- name: Install and configure Nginx
   hosts: Linux_Inventory
-  gather_facts: no
+  become: yes
+ 
   tasks:
-  - name: Test connectivity using ping
+    - name: Update package cache (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+ 
+    - name: Install Nginx (Debian/Ubuntu)
+      apt:
+        name: nginx
+        state: present
+      when: ansible_os_family == "Debian"
+ 
+    - name: Install Nginx (RHEL/CentOS/Rocky/Alma)
+      yum:
+        name: nginx
+        state: present
+      when: ansible_os_family == "RedHat"
+ 
+    - name: Start and enable Nginx service
+      service:
+        name: nginx
+        state: started
+        enabled: yes
   
