@@ -1,6 +1,6 @@
 ---
 - name: Install NGINX on web server
-  hosts: webservers
+  hosts: Linux_Inventory
   tasks:
     - name: Update apt cache
       apt:
