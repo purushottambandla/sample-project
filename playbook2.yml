@@ -5,4 +5,4 @@
   gather_facts: no
   tasks:
     - name: Test connectivity using ping
-      ansible
+  
