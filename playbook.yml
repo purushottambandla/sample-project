@@ -1,12 +1,1 @@
----
-- name: Install NGINX on web server
-  hosts: Linux_Inventory
-  tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
 
-    - name: Install NGINX
-      apt:
-        name: nginx
-        state: present
