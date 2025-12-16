@@ -1,0 +1,7 @@
+
+---
+- name: Ping target servers
+  hosts: Linux_Inventory
+  gather_facts: no
+   tasks:
+    - name: Test connectivity using ping
