@@ -3,5 +3,6 @@
 - name: Ping target servers
   hosts: Linux_Inventory
   gather_facts: no
-    tasks:
+  tasks:
     - name: Test connectivity using ping
+      ansible
