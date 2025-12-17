@@ -1,6 +1,6 @@
 ---
 - name: System Health Check (CPU | Memory | Disk) - RHEL 9.4
-  hosts: all
+  hosts: localhost
   become: true
   gather_facts: no
  
