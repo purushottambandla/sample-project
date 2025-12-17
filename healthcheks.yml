@@ -50,9 +50,6 @@
     - name: Display System Health Summary
       debug:
         msg: |
-          ==========================================
-          🖥️  SYSTEM HEALTH CHECK - {{ inventory_hostname }}
-          ==========================================
  
           🔹 CPU Utilization    : {{ cpu_usage.stdout | int }}%
           🔹 Memory Utilization : {{ mem_usage.stdout | int }}%
