@@ -1,7 +1,6 @@
 ---
 - name: Install and configure Nginx
   hosts: Linux_Inventory
-  become: yes
  
   tasks:
     - name: Update package cache (Debian/Ubuntu)
