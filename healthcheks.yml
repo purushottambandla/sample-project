@@ -1,6 +1,6 @@
 ---
 - name: System Health Check (CPU | Memory | Disk) - RHEL 9.4
-  hosts: localhost
+  hosts: all
   become: true
   gather_facts: no
  
@@ -50,6 +50,9 @@
     - name: Display System Health Summary
       debug:
         msg: |
+          ==========================================
+          🖥️  SYSTEM HEALTH CHECK - {{ inventory_hostname }}
+          ==========================================
  
           🔹 CPU Utilization    : {{ cpu_usage.stdout | int }}%
           🔹 Memory Utilization : {{ mem_usage.stdout | int }}%
