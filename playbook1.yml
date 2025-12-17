@@ -1,0 +1,16 @@
+---
+- name: Check CPU utilization using mpstat
+  hosts: all
+  tasks:
+    - name: Ensure sysstat is installed
+      package:
+        name: sysstat
+        state: present
+ 
+    - name: Get CPU utilization
+      command: mpstat 1 1
+      register: cpu_output
+ 
+    - name: Show CPU utilization
+      debug:
+        var: cpu_output.stdout
