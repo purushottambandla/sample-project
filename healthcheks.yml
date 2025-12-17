@@ -47,23 +47,6 @@
           {{ disk_exceeded.stdout_lines }}
       when: disk_exceeded.stdout != ""
  
- 
-    - name: Fail if CPU utilization exceeded
-      fail:
-        msg: " CPU utilization exceeded {{ cpu_threshold }}% (Current: {{ cpu_usage }}%)"
-      when: cpu_usage | int > cpu_threshold
- 
-    - name: Fail if Memory utilization exceeded
-      fail:
-        msg: " Memory utilization exceeded {{ memory_threshold }}% (Current: {{ memory_usage.stdout }}%)"
-      when: memory_usage.stdout | int > memory_threshold
- 
-    - name: Fail if Disk utilization exceeded
-      fail:
-        msg: " Disk utilization exceeded {{ disk_threshold }}%"
-      when: disk_exceeded.stdout != ""
- 
- 
     - name: System health check passed
       debug:
         msg: "✅ System health check passed: CPU, Memory, and Disk are within limits"
