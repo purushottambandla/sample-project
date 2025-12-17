@@ -1,16 +1,36 @@
 ---
-- name: Check CPU utilization using mpstat
+- name: Check Disk Utilization on RHEL 9.4
   hosts: localhost
+  become: true
+  gather_facts: no
+ 
+  vars:
+    disk_threshold: 80   # Percentage
+ 
   tasks:
-    - name: Ensure sysstat is installed
-      package:
-        name: sysstat
-        state: present
+    - name: Get disk usage
+      command: df -hP
+      register: disk_usage
+      changed_when: false
  
-    - name: Get CPU utilization
-      command: mpstat 1 1
-      register: cpu_output
- 
-    - name: Show CPU utilization
+    - name: Display disk usage
       debug:
-        var: cpu_output.stdout
+        msg: "{{ disk_usage.stdout_lines }}"
+ 
+    - name: Check disk utilization against threshold
+      shell: |
+        df -hP | awk 'NR>1 {gsub("%","",$5); if ($5 > {{ disk_threshold }}) print $0}'
+      register: disk_exceeded
+      changed_when: false
+ 
+    - name: Show warning if disk usage exceeded
+      debug:
+        msg: |
+          ⚠️ Disk usage exceeded {{ disk_threshold }}%:
+          {{ disk_exceeded.stdout_lines }}
+      when: disk_exceeded.stdout != ""
+ 
+    - name: Fail if disk usage exceeded threshold
+      fail:
+        msg: "❌ Disk usage exceeded {{ disk_threshold }}% on one or more filesystems"
+      when: disk_exceeded.stdout != ""
