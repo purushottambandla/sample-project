@@ -1,6 +1,6 @@
 ---
 - name: Check CPU utilization using mpstat
-  hosts: Linux_Inventory
+  hosts: webserver
   tasks:
     - name: Ensure sysstat is installed
       package:
