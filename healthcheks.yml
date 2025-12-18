@@ -1,91 +1,69 @@
 ---
-- name: System Health Check (CPU | Memory | Disk) - RHEL 9.4
-  hosts: web-server
-  become: true
-  gather_facts: no
- 
-  vars:
-    cpu_threshold: 80
-    memory_threshold: 80
-    disk_threshold: 80
+- name: RHEL 9.4 VM Health Check
+  hosts: all
+  become: yes
+  become_user: root
+  gather_facts: yes
  
   tasks:
  
-    #################################################
-    # CPU UTILIZATION
-    #################################################
-    - name: Get CPU idle percentage
-      shell: |
-        top -bn1 | awk -F',' '/Cpu\(s\)/ {print 100 - $4}'
-      register: cpu_usage
-      changed_when: false
- 
-    #################################################
-    # MEMORY UTILIZATION
-    #################################################
-    - name: Get memory usage percentage
-      shell: |
-        free | awk '/Mem:/ {printf "%.0f", $3/$2 * 100}'
-      register: mem_usage
-      changed_when: false
- 
-    #################################################
-    # DISK UTILIZATION
-    #################################################
-    - name: Get disk usage per filesystem
-      shell: |
-        df -hP -x tmpfs -x devtmpfs | awk 'NR>1 {print $6 ": " $5}'
-      register: disk_usage
-      changed_when: false
- 
-    - name: Check disk usage exceeding threshold
-      shell: |
-        df -hP -x tmpfs -x devtmpfs | awk 'NR>1 {gsub("%","",$5); if ($5 > {{ disk_threshold }}) print $6 " (" $5 "%)"}'
-      register: disk_alert
-      changed_when: false
- 
-    #################################################
-    # NEAT OUTPUT
-    #################################################
-    - name: Display System Health Summary
+    - name: Display OS version
       debug:
-        msg: |
-          ==========================================
-          🖥️  SYSTEM HEALTH CHECK - {{ inventory_hostname }}
-          ==========================================
+        msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
  
-          🔹 CPU Utilization    : {{ cpu_usage.stdout | int }}%
-          🔹 Memory Utilization : {{ mem_usage.stdout | int }}%
+    - name: Display system uptime
+      command: uptime
+      register: uptime_output
  
-          🔹 Disk Utilization:
-          {% for line in disk_usage.stdout_lines %}
-            - {{ line }}
-          {% endfor %}
+    - name: Show uptime
+      debug:
+        msg: "{{ uptime_output.stdout }}"
  
-          {% if disk_alert.stdout != "" %}
-          ⚠️ Disk Threshold Exceeded (> {{ disk_threshold }}%):
-          {% for line in disk_alert.stdout_lines %}
-            - {{ line }}
-          {% endfor %}
-          {% else %}
-          ✅ Disk usage within threshold
-          {% endif %}
+    - name: Check CPU load
+      shell: cat /proc/loadavg
+      register: cpu_load
  
-          ==========================================
-    #################################################
-    # FAIL CONDITIONS
-    #################################################
-    - name: Fail if CPU utilization exceeded
-      fail:
-        msg: "❌ CPU utilization exceeded {{ cpu_threshold }}%"
-      when: cpu_usage.stdout | int > cpu_threshold
+    - name: Show CPU load
+      debug:
+        msg: "CPU Load Average: {{ cpu_load.stdout }}"
  
-    - name: Fail if Memory utilization exceeded
-      fail:
-        msg: "❌ Memory utilization exceeded {{ memory_threshold }}%"
-      when: mem_usage.stdout | int > memory_threshold
+    - name: Check memory usage
+      command: free -h
+      register: memory_output
  
-    - name: Fail if Disk utilization exceeded
-      fail:
-        msg: "❌ Disk utilization exceeded {{ disk_threshold }}%"
-      when: disk_alert.stdout != ""
+    - name: Show memory usage
+      debug:
+        msg: "{{ memory_output.stdout_lines }}"
+ 
+    - name: Check disk usage
+      command: df -h
+      register: disk_output
+ 
+    - name: Show disk usage
+      debug:
+        msg: "{{ disk_output.stdout_lines }}"
+ 
+    - name: Check SSH service status
+      systemd:
+        name: sshd
+        state: started
+      register: ssh_status
+ 
+    - name: Check firewalld service status
+      systemd:
+        name: firewalld
+        state: started
+      register: firewall_status
+ 
+    - name: Ping gateway to check network
+      command: ping -c 3 8.8.8.8
+      register: ping_result
+      ignore_errors: yes
+ 
+    - name: Show network status
+      debug:
+        msg: >
+          Network is {{
+          'reachable' if ping_result.rc == 0 else 'NOT reachable'
+          }}
+ 
