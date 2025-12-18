@@ -1,2 +1,2 @@
 [web-server]
-10.134.54.37
+10.134.54.37 ansible_user+root
