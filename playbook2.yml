@@ -1,6 +1,6 @@
 ---
 - name: Install and configure Nginx
-  hosts: localhost
+  hosts: web-server
  
   tasks:
     - name: Update package cache (Debian/Ubuntu)
