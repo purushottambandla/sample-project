@@ -1,7 +1,6 @@
 ---
 - name: Check Disk Utilization on RHEL 9.4
   hosts: web-server
-  become: true
   gather_facts: no
  
   vars:
